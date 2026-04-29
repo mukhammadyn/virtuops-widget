@@ -1,27 +1,57 @@
 {
   "name": "@virtuops/widget-react",
   "version": "0.1.0",
+  "description": "React wrapper for @virtuops/widget — embed the VirtuOps chat widget as a JSX component.",
+  "license": "MIT",
+  "author": "VirtuOps",
+  "homepage": "https://github.com/mukhammadyn/virtuops-widget#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mukhammadyn/virtuops-widget.git",
+    "directory": "packages/widget-react"
+  },
+  "bugs": {
+    "url": "https://github.com/mukhammadyn/virtuops-widget/issues"
+  },
+  "keywords": [
+    "chat",
+    "chatbot",
+    "widget",
+    "ai",
+    "react",
+    "react-component",
+    "virtuops"
+  ],
+  "type": "module",
   "main": "dist/index.js",
   "module": "dist/index.js",
   "types": "dist/index.d.ts",
   "exports": {
     ".": {
+      "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
     }
   },
+  "sideEffects": false,
   "files": [
-    "dist"
+    "dist",
+    "README.md",
+    "LICENSE"
   ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "build": "vite build",
-    "type-check": "tsc --noEmit"
-  },
-  "dependencies": {
-    "@virtuops/widget": "workspace:*"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "react": ">=18",
     "react-dom": ">=18"
+  },
+  "dependencies": {
+    "@virtuops/widget": "workspace:*"
   },
   "devDependencies": {
     "@types/react": "^18.3.3",

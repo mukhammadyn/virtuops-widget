@@ -1,24 +1,59 @@
 {
   "name": "@virtuops/widget",
   "version": "0.1.0",
+  "description": "Embeddable AI chat widget for VirtuOps. Framework-agnostic web component with branding, real-time operator handoff, and zero runtime dependencies for the host page.",
+  "license": "MIT",
+  "author": "VirtuOps",
+  "homepage": "https://github.com/mukhammadyn/virtuops-widget#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mukhammadyn/virtuops-widget.git",
+    "directory": "packages/widget"
+  },
+  "bugs": {
+    "url": "https://github.com/mukhammadyn/virtuops-widget/issues"
+  },
+  "keywords": [
+    "chat",
+    "chatbot",
+    "widget",
+    "ai",
+    "live-chat",
+    "support",
+    "web-component",
+    "virtuops"
+  ],
+  "type": "module",
   "main": "dist/widget.es.js",
   "module": "dist/widget.es.js",
   "types": "dist/index.d.ts",
+  "unpkg": "dist/widget.js",
+  "jsdelivr": "dist/widget.js",
   "exports": {
     ".": {
-      "import": "./dist/widget.es.js",
-      "require": "./dist/widget.cjs.js"
+      "types": "./dist/index.d.ts",
+      "import": "./dist/widget.es.js"
     }
   },
-  "files": [
-    "dist"
+  "sideEffects": [
+    "*.css",
+    "**/web-component/**"
   ],
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "publishConfig": {
+    "access": "public"
+  },
   "scripts": {
     "dev": "vite",
     "build": "pnpm build:es && pnpm build:iife",
     "build:es": "vite build",
     "build:iife": "FORMAT=iife vite build --config vite.config.iife.ts",
-    "type-check": "tsc --noEmit"
+    "type-check": "tsc --noEmit",
+    "prepublishOnly": "pnpm build"
   },
   "peerDependencies": {
     "react": ">=18",
