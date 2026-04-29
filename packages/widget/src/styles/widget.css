@@ -1,0 +1,536 @@
+/* ── CSS Custom Properties ─────────────────────────── */
+:host {
+  --vo-primary: #6366f1;
+  --vo-bg: #ffffff;
+  --vo-surface: #f4f4f5;
+  --vo-text: #18181b;
+  --vo-text-muted: #a1a1aa;
+  --vo-border: #e4e4e7;
+  --vo-header-bg: #000000;
+  --vo-user-bubble-bg: #000000;
+  --vo-user-bubble-text: #ffffff;
+  --vo-bot-bubble-bg: #f4f4f5;
+  --vo-bot-bubble-text: #18181b;
+  --vo-input-bg: #ffffff;
+  --vo-input-inner-bg: #ffffff;
+  --vo-send-bg: #000000;
+  --vo-radius: 16px;
+  --vo-shadow-lg: 0 8px 40px rgba(0, 0, 0, 0.12);
+
+  /* Bubble-size scale (default = md). */
+  --vo-window-w: 380px;
+  --vo-window-h: 600px;
+  --vo-launcher-size: 56px;
+  --vo-bubble-radius: 18px;
+  --vo-bubble-padding-y: 12px;
+  --vo-bubble-padding-x: 16px;
+  --vo-bubble-font: 14px;
+}
+
+/* Auto-theme: follow system, but only when operator hasn't forced one. */
+@media (prefers-color-scheme: dark) {
+  :host(:not([data-theme='light'])) {
+    --vo-bg: #1a1a1a;
+    --vo-surface: #2a2a2a;
+    --vo-text: #fafafa;
+    --vo-text-muted: #71717a;
+    --vo-border: #2a2a2a;
+    --vo-header-bg: #000000;
+    --vo-user-bubble-bg: #000000;
+    --vo-bot-bubble-bg: #2a2a2a;
+    --vo-bot-bubble-text: #fafafa;
+    --vo-input-bg: #1a1a1a;
+    --vo-input-inner-bg: #27272a;
+  }
+}
+
+/* Forced dark — wins regardless of system preference. */
+:host([data-theme='dark']) {
+  --vo-bg: #1a1a1a;
+  --vo-surface: #2a2a2a;
+  --vo-text: #fafafa;
+  --vo-text-muted: #71717a;
+  --vo-border: #2a2a2a;
+  --vo-header-bg: #000000;
+  --vo-user-bubble-bg: #000000;
+  --vo-bot-bubble-bg: #2a2a2a;
+  --vo-bot-bubble-text: #fafafa;
+  --vo-input-bg: #1a1a1a;
+  --vo-input-inner-bg: #27272a;
+}
+
+/* Bubble-size variants. */
+:host([data-bubble-size='sm']) {
+  --vo-window-w: 340px;
+  --vo-window-h: 540px;
+  --vo-launcher-size: 48px;
+  --vo-bubble-padding-y: 10px;
+  --vo-bubble-padding-x: 14px;
+  --vo-bubble-font: 13px;
+}
+
+:host([data-bubble-size='lg']) {
+  --vo-window-w: 420px;
+  --vo-window-h: 680px;
+  --vo-launcher-size: 64px;
+  --vo-bubble-padding-y: 14px;
+  --vo-bubble-padding-x: 18px;
+  --vo-bubble-font: 15px;
+}
+
+/* ── Reset ─────────────────────────────────────────── */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* ── Launcher Button ───────────────────────────────── */
+@keyframes vo-launcher-in {
+  from {
+    opacity: 0;
+    transform: scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.vo-launcher {
+  position: fixed;
+  bottom: 24px;
+  width: var(--vo-launcher-size);
+  height: var(--vo-launcher-size);
+  border-radius: 50%;
+  background: var(--vo-primary);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 20px color-mix(in srgb, var(--vo-primary) 40%, transparent);
+  transition: transform 0.15s ease;
+  z-index: 2147483646;
+  color: white;
+  animation: vo-launcher-in 0.2s ease-out both;
+  overflow: hidden;
+}
+
+.vo-launcher__icon {
+  width: 60%;
+  height: 60%;
+  object-fit: contain;
+  pointer-events: none;
+}
+
+.vo-launcher:hover {
+  transform: scale(1.05);
+}
+
+.vo-launcher:active {
+  transform: scale(0.96);
+}
+
+/* ── Chat Window ───────────────────────────────────── */
+.vo-window {
+  position: fixed;
+  bottom: 96px;
+  width: var(--vo-window-w);
+  height: var(--vo-window-h);
+  background: var(--vo-bg);
+  border-radius: var(--vo-radius);
+  box-shadow: var(--vo-shadow-lg);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 2147483645;
+  opacity: 0;
+  transform: translateY(16px) scale(0.97);
+  transform-origin: bottom center;
+  pointer-events: none;
+  transition:
+    opacity 0.2s ease-out,
+    transform 0.2s ease-out;
+}
+
+.vo-window--open {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  pointer-events: auto;
+}
+
+/* ── Header ────────────────────────────────────────── */
+.vo-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 0 16px;
+  height: 64px;
+  background: var(--vo-header-bg);
+  flex-shrink: 0;
+}
+
+.vo-header__avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: #2a2a2a;
+  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 15px;
+  flex-shrink: 0;
+  font-family: system-ui, sans-serif;
+  overflow: hidden;
+}
+
+.vo-header__avatar-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.vo-header__title-block {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-width: 0;
+}
+
+.vo-header__name {
+  color: white;
+  font-weight: 600;
+  font-size: 16px;
+  font-family: system-ui, sans-serif;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.vo-header__subtitle {
+  color: rgba(255, 255, 255, 0.65);
+  font-size: 12px;
+  font-family: system-ui, sans-serif;
+  font-weight: 400;
+  margin-top: 2px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  line-height: 1.2;
+}
+
+.vo-header__actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.vo-header__btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  opacity: 0.9;
+  border-radius: 6px;
+  transition: opacity 0.15s;
+}
+
+.vo-header__btn:hover {
+  opacity: 0.7;
+}
+
+/* ── Message List ──────────────────────────────────── */
+.vo-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  scroll-behavior: smooth;
+  background: var(--vo-bg);
+}
+
+.vo-messages::-webkit-scrollbar {
+  width: 4px;
+}
+
+.vo-messages::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.vo-messages::-webkit-scrollbar-thumb {
+  background: var(--vo-border);
+  border-radius: 2px;
+}
+
+/* ── Message Bubbles ───────────────────────────────── */
+.vo-msg {
+  display: flex;
+  flex-direction: column;
+  max-width: 85%;
+}
+
+.vo-msg--user {
+  align-self: flex-end;
+  align-items: flex-end;
+}
+
+.vo-msg--bot,
+.vo-msg--operator {
+  align-self: flex-start;
+  align-items: flex-start;
+}
+
+.vo-msg--system {
+  align-self: center;
+  align-items: center;
+  max-width: 90%;
+}
+
+.vo-msg__author {
+  font-size: 11px;
+  font-weight: 600;
+  font-family: system-ui, sans-serif;
+  color: var(--vo-primary);
+  margin: 0 0 4px 4px;
+}
+
+.vo-msg__bubble {
+  padding: var(--vo-bubble-padding-y) var(--vo-bubble-padding-x);
+  font-size: var(--vo-bubble-font);
+  line-height: 1.6;
+  font-family: system-ui, sans-serif;
+  word-break: break-word;
+}
+
+.vo-msg--user .vo-msg__bubble {
+  background: var(--vo-user-bubble-bg);
+  color: var(--vo-user-bubble-text);
+  border-radius: var(--vo-bubble-radius) var(--vo-bubble-radius) 4px var(--vo-bubble-radius);
+}
+
+.vo-msg--bot .vo-msg__bubble {
+  background: var(--vo-bot-bubble-bg);
+  color: var(--vo-bot-bubble-text);
+  border-radius: var(--vo-bubble-radius) var(--vo-bubble-radius) var(--vo-bubble-radius) 4px;
+}
+
+.vo-msg--operator .vo-msg__bubble {
+  background: color-mix(in srgb, var(--vo-primary) 12%, var(--vo-bot-bubble-bg));
+  color: var(--vo-bot-bubble-text);
+  border: 1px solid color-mix(in srgb, var(--vo-primary) 25%, transparent);
+  border-radius: var(--vo-bubble-radius) var(--vo-bubble-radius) var(--vo-bubble-radius) 4px;
+}
+
+.vo-msg--system span {
+  font-size: 12px;
+  color: var(--vo-text-muted);
+  font-family: system-ui, sans-serif;
+  background: var(--vo-surface);
+  padding: 6px 12px;
+  border-radius: 12px;
+}
+
+/* ── Streaming Cursor ──────────────────────────────── */
+@keyframes vo-blink {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0;
+  }
+}
+
+.vo-cursor {
+  animation: vo-blink 1s infinite;
+}
+
+/* ── Typing Indicator ──────────────────────────────── */
+.vo-typing {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  padding: var(--vo-bubble-padding-y) var(--vo-bubble-padding-x);
+  background: var(--vo-bot-bubble-bg);
+  border-radius: var(--vo-bubble-radius) var(--vo-bubble-radius) var(--vo-bubble-radius) 4px;
+}
+
+@keyframes vo-dot-bounce {
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+  }
+  30% {
+    transform: translateY(-4px);
+  }
+}
+
+.vo-typing__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--vo-text-muted);
+  animation: vo-dot-bounce 1s ease-in-out infinite;
+}
+
+.vo-typing__dot:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.vo-typing__dot:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+/* ── Suggested Questions ───────────────────────────── */
+.vo-suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+  padding: 4px 0;
+}
+
+.vo-suggestion {
+  border: 1px solid var(--vo-border);
+  border-radius: 999px;
+  background: var(--vo-bg);
+  color: var(--vo-text);
+  font-size: 13px;
+  font-weight: 500;
+  font-family: system-ui, sans-serif;
+  padding: 8px 16px;
+  cursor: pointer;
+  transition:
+    background 0.15s,
+    color 0.15s;
+  white-space: nowrap;
+}
+
+.vo-suggestion:hover {
+  background: var(--vo-surface);
+}
+
+/* ── Powered By ────────────────────────────────────── */
+.vo-powered {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  height: 36px;
+  font-size: 12px;
+  color: var(--vo-text-muted);
+  font-family: system-ui, sans-serif;
+  border-top: 1px solid var(--vo-border);
+  flex-shrink: 0;
+}
+
+.vo-powered a {
+  color: var(--vo-primary);
+  text-decoration: none;
+}
+
+.vo-powered a:hover {
+  text-decoration: underline;
+}
+
+/* ── Input Area ────────────────────────────────────── */
+.vo-input-bar {
+  padding: 12px 16px;
+  border-top: 1px solid var(--vo-border);
+  background: var(--vo-input-bg);
+  flex-shrink: 0;
+}
+
+.vo-input-inner {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--vo-border);
+  border-radius: 999px;
+  background: var(--vo-input-inner-bg);
+  padding: 8px 8px 8px 14px;
+}
+
+.vo-icon-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--vo-text-muted);
+  transition: color 0.15s;
+  flex-shrink: 0;
+  padding: 0;
+}
+
+.vo-icon-btn:hover {
+  color: var(--vo-text);
+}
+
+.vo-input {
+  flex: 1;
+  resize: none;
+  border: none;
+  outline: none;
+  font-size: 14px;
+  font-family: system-ui, sans-serif;
+  color: var(--vo-text);
+  background: transparent;
+  line-height: 1.5;
+  max-height: 96px;
+  overflow-y: auto;
+}
+
+.vo-input::placeholder {
+  color: var(--vo-text-muted);
+}
+
+.vo-send {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--vo-send-bg);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  transition: opacity 0.15s;
+}
+
+.vo-send:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Responsive ────────────────────────────────────── */
+@media (max-width: 440px) {
+  .vo-window {
+    width: calc(100vw - 16px);
+    height: min(var(--vo-window-h), calc(100dvh - 96px));
+    left: 8px !important;
+    right: 8px !important;
+    bottom: 88px;
+  }
+
+  .vo-launcher {
+    bottom: 16px;
+  }
+}

@@ -1,0 +1,40 @@
+{
+  "name": "@virtuops/widget",
+  "version": "0.1.0",
+  "main": "dist/widget.es.js",
+  "module": "dist/widget.es.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/widget.es.js",
+      "require": "./dist/widget.cjs.js"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm build:es && pnpm build:iife",
+    "build:es": "vite build",
+    "build:iife": "FORMAT=iife vite build --config vite.config.iife.ts",
+    "type-check": "tsc --noEmit"
+  },
+  "peerDependencies": {
+    "react": ">=18",
+    "react-dom": ">=18"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.3",
+    "@types/react-dom": "^18.3.0",
+    "@vitejs/plugin-react": "^4.3.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "typescript": "^5.4.5",
+    "vite": "^5.2.11",
+    "vite-plugin-dts": "^3.9.1"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.8.3"
+  }
+}
