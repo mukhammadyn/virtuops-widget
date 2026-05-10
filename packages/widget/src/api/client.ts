@@ -1,4 +1,10 @@
-import type { WidgetConfig } from '../types'
+import type {
+  AttachmentType,
+  MediaItem,
+  MessageAttachment,
+  MessageSegment,
+  WidgetConfig,
+} from '../types'
 
 export interface HistoryResponseItem {
   id: string
@@ -6,6 +12,15 @@ export interface HistoryResponseItem {
   content: string
   operatorName?: string
   createdAt: string
+  media?: MediaItem[]
+  segments?: MessageSegment[]
+  attachments?: MessageAttachment[]
+}
+
+export interface UploadResult {
+  url: string
+  type: AttachmentType
+  mimeType: string
 }
 
 export interface HistoryResponse {
@@ -77,18 +92,41 @@ export class WidgetApiClient {
     return res.json()
   }
 
+  /** Uploads a single visitor file (image/audio/video) and returns the
+   *  signed URL the caller then attaches to the next streamMessage() call. */
+  async uploadAttachment(file: File | Blob): Promise<UploadResult> {
+    const fd = new FormData()
+    fd.append('token', this.token)
+    fd.append('file', file, (file as File).name ?? 'upload')
+    const res = await fetch(`${this.baseUrl}/widget/upload`, {
+      method: 'POST',
+      body: fd,
+    })
+    if (!res.ok) {
+      const text = await res.text().catch(() => '')
+      throw new Error(`Upload failed: ${res.status} ${text}`)
+    }
+    return res.json()
+  }
+
   streamMessage(
     message: string,
     onToken: (token: string) => void,
     onDone: () => void,
     onHandoff: () => void,
     onError: (err: Error) => void,
+    onMedia?: (media: MediaItem[], segments: MessageSegment[]) => void,
+    attachments?: MessageAttachment[],
   ): () => void {
     const params = new URLSearchParams({
       token: this.token,
       visitorId: this.visitorId,
       message: encodeURIComponent(message),
     })
+    if (attachments?.length) {
+      // Backend SSE DTO @Transform-parses this back into an array.
+      params.set('attachments', JSON.stringify(attachments))
+    }
     const url = `${this.baseUrl}/widget/message/stream?${params}`
     const es = new EventSource(url)
 
@@ -96,7 +134,9 @@ export class WidgetApiClient {
       try {
         const data = JSON.parse(e.data)
         if (data.token !== undefined) onToken(data.token)
-        else if (data.done) {
+        else if (data.kind === 'media' && Array.isArray(data.segments)) {
+          onMedia?.(data.media ?? [], data.segments)
+        } else if (data.done) {
           onDone()
           es.close()
         } else if (data.handoff) {

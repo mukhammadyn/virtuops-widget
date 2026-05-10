@@ -1,7 +1,7 @@
 import { Header } from './Header'
 import { MessageList } from './MessageList'
-import { MessageInput } from './MessageInput'
-import type { Message, WidgetConfig } from '../types'
+import { MessageInput, type UploadHandler } from './MessageInput'
+import type { Message, MessageAttachment, WidgetConfig } from '../types'
 
 interface ChatWindowProps {
   config: WidgetConfig
@@ -9,7 +9,8 @@ interface ChatWindowProps {
   isStreaming: boolean
   isOpen: boolean
   onClose: () => void
-  onSend: (text: string) => void
+  onSend: (text: string, attachments?: MessageAttachment[]) => void
+  onUpload?: UploadHandler
 }
 
 const VirtuOpsLogo = () => (
@@ -51,6 +52,7 @@ export function ChatWindow({
   isOpen,
   onClose,
   onSend,
+  onUpload,
 }: ChatWindowProps) {
   const position = config.position ?? 'bottom-right'
   const side = position === 'bottom-left' ? 'left: 24px' : 'right: 24px'
@@ -76,7 +78,7 @@ export function ChatWindow({
           messages={messages}
           isStreaming={isStreaming}
           suggestedQuestions={config.suggestedQuestions}
-          onSuggest={onSend}
+          onSuggest={(text) => onSend(text)}
         />
         {!config.hidePoweredBy && (
           <div className="vo-powered">
@@ -89,6 +91,7 @@ export function ChatWindow({
         )}
         <MessageInput
           onSend={onSend}
+          onUpload={onUpload}
           isStreaming={isStreaming}
           placeholder={config.placeholderText ?? 'Ask me anything...'}
           enableFileUpload={config.enableFileUpload}

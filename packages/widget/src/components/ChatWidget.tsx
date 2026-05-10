@@ -1,17 +1,17 @@
-import { useRef } from 'react'
+import { useCallback, useRef } from 'react'
 import { WidgetApiClient } from '../api/client'
 import { WidgetSocket } from '../api/socket'
 import { useConfig } from '../hooks/useConfig'
 import { useChat } from '../hooks/useChat'
 import { LauncherButton } from './LauncherButton'
 import { ChatWindow } from './ChatWindow'
-import type { ChatProps } from '../types'
+import type { ChatProps, MessageAttachment } from '../types'
 
 interface ChatWidgetProps extends ChatProps {
   shadowRoot: ShadowRoot | null
 }
 
-export function ChatWidget({ token, apiUrl, shadowRoot }: ChatWidgetProps) {
+export function ChatWidget({ token, apiUrl, theme, shadowRoot }: ChatWidgetProps) {
   const baseUrl = apiUrl ?? 'https://api.virtuops.io'
   const clientRef = useRef<WidgetApiClient | null>(null)
   if (!clientRef.current) {
@@ -25,11 +25,19 @@ export function ChatWidget({ token, apiUrl, shadowRoot }: ChatWidgetProps) {
   }
   const socket = socketRef.current
 
-  const { config, loading } = useConfig(client, shadowRoot, socket)
+  const { config, loading } = useConfig(client, shadowRoot, socket, theme)
   const { messages, isStreaming, sendMessage, isOpen, setIsOpen } = useChat(
     client,
     config,
     socket,
+  )
+
+  const handleUpload = useCallback(
+    async (file: File | Blob): Promise<MessageAttachment> => {
+      const res = await client.uploadAttachment(file)
+      return { type: res.type, url: res.url, mimeType: res.mimeType }
+    },
+    [client],
   )
 
   if (loading || !config) return null
@@ -45,6 +53,7 @@ export function ChatWidget({ token, apiUrl, shadowRoot }: ChatWidgetProps) {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         onSend={sendMessage}
+        onUpload={handleUpload}
       />
       <LauncherButton
         isOpen={isOpen}

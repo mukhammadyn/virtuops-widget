@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import type { WidgetConfig } from '../types'
+import type { WidgetConfig, WidgetTheme } from '../types'
 import type { WidgetApiClient } from '../api/client'
 import type { WidgetSocket } from '../api/socket'
 
@@ -7,6 +7,7 @@ export function useConfig(
   client: WidgetApiClient,
   shadowRoot: ShadowRoot | null,
   socket: WidgetSocket,
+  themeOverride?: WidgetTheme,
 ) {
   const [config, setConfig] = useState<WidgetConfig | null>(null)
   const [loading, setLoading] = useState(true)
@@ -55,11 +56,13 @@ export function useConfig(
       host.style.removeProperty('--vo-primary')
     }
 
-    setOrRemoveAttr(host, 'data-theme', config.theme)
+    // Prop-supplied theme wins over backend config — lets embeds force a
+    // theme regardless of what's saved in the dashboard.
+    setOrRemoveAttr(host, 'data-theme', themeOverride ?? config.theme)
     setOrRemoveAttr(host, 'data-bubble-size', config.bubbleSize)
     setOrRemoveAttr(host, 'data-position', config.position)
     setOrRemoveAttr(host, 'lang', config.language)
-  }, [config, shadowRoot])
+  }, [config, shadowRoot, themeOverride])
 
   return { config, loading, error }
 }

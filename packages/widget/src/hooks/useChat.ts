@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react'
-import type { Message, WidgetConfig } from '../types'
+import type { Message, MessageAttachment, WidgetConfig } from '../types'
 import type { WidgetApiClient, HistoryResponseItem } from '../api/client'
 import type { WidgetSocket } from '../api/socket'
 
@@ -14,6 +14,9 @@ function historyToMessage(item: HistoryResponseItem): Message {
     content: item.content,
     operatorName: item.operatorName,
     timestamp: new Date(item.createdAt),
+    ...(item.media?.length ? { media: item.media } : {}),
+    ...(item.segments?.length ? { segments: item.segments } : {}),
+    ...(item.attachments?.length ? { attachments: item.attachments } : {}),
   }
 }
 
@@ -124,8 +127,11 @@ export function useChat(
   }, [])
 
   const sendMessage = useCallback(
-    async (text: string) => {
-      if (!text.trim() || isStreaming) return
+    async (text: string, attachments?: MessageAttachment[]) => {
+      const trimmed = text.trim()
+      // Allow sending when text is empty but attachments exist (voice or
+      // image-only message).
+      if ((!trimmed && !attachments?.length) || isStreaming) return
 
       // Cancel any in-flight stream
       cleanupRef.current?.()
@@ -134,8 +140,9 @@ export function useChat(
       const userMsg: Message = {
         id: makeId(),
         role: 'user',
-        content: text.trim(),
+        content: trimmed,
         timestamp: new Date(),
+        ...(attachments?.length ? { attachments } : {}),
       }
       const assistantId = makeId()
       const assistantMsg: Message = {
@@ -150,7 +157,7 @@ export function useChat(
       setIsStreaming(true)
 
       cleanupRef.current = client.streamMessage(
-        text.trim(),
+        trimmed,
         (token) => {
           setMessages((prev) =>
             prev.map((m) => (m.id === assistantId ? { ...m, content: m.content + token } : m)),
@@ -201,6 +208,17 @@ export function useChat(
           setIsStreaming(false)
           cleanupRef.current = null
         },
+        // onMedia: backend resolved [photo:N] tokens streamed inside content
+        // into real URLs. Attach them so the bubble can swap text for a
+        // proper segments+album layout.
+        (media, segments) => {
+          setMessages((prev) =>
+            prev.map((m) =>
+              m.id === assistantId ? { ...m, media, segments } : m,
+            ),
+          )
+        },
+        attachments,
       )
     },
     [client, isStreaming, config?.offlineMessage],

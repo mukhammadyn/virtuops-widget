@@ -335,6 +335,211 @@
   border-radius: var(--vo-bubble-radius) var(--vo-bubble-radius) var(--vo-bubble-radius) 4px;
 }
 
+/* Photo album for assistant answers with images.
+   Layout mirrors what the visitor would see on Telegram: a single hero photo
+   for one image, a 2-column grid for albums of 2+, with the answer text
+   surfacing below as the album caption. */
+.vo-msg__segments {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.vo-album-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  max-width: 320px;
+}
+
+.vo-album {
+  display: grid;
+  gap: 4px;
+  border-radius: var(--vo-bubble-radius);
+  overflow: hidden;
+}
+
+.vo-album--single {
+  grid-template-columns: 1fr;
+}
+
+.vo-album--grid {
+  grid-template-columns: 1fr 1fr;
+}
+
+.vo-album__cell {
+  display: block;
+  padding: 0;
+  margin: 0;
+  border: none;
+  background: none;
+  cursor: zoom-in;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  transition: opacity 0.15s ease;
+}
+
+.vo-album__cell:hover {
+  opacity: 0.92;
+}
+
+.vo-album__cell:focus-visible {
+  outline: 2px solid var(--vo-primary);
+  outline-offset: 2px;
+}
+
+.vo-album__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  background: var(--vo-bot-bubble-bg);
+}
+
+.vo-album--single .vo-album__img {
+  max-height: 320px;
+}
+
+.vo-album--grid .vo-album__img {
+  height: 140px;
+}
+
+/* ── Photo Lightbox ────────────────────────────────── */
+@keyframes vo-lightbox-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.vo-lightbox {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.88);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2147483647;
+  padding: 56px 56px 80px;
+  animation: vo-lightbox-in 0.15s ease-out;
+  cursor: zoom-out;
+}
+
+.vo-lightbox__img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  display: block;
+  border-radius: 4px;
+  box-shadow: 0 8px 40px rgba(0, 0, 0, 0.5);
+  cursor: default;
+  user-select: none;
+}
+
+.vo-lightbox__close,
+.vo-lightbox__nav {
+  position: absolute;
+  background: rgba(255, 255, 255, 0.12);
+  border: none;
+  border-radius: 50%;
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: background 0.15s ease, transform 0.15s ease;
+}
+
+.vo-lightbox__close {
+  top: 16px;
+  right: 16px;
+  width: 36px;
+  height: 36px;
+}
+
+.vo-lightbox__nav {
+  top: 50%;
+  transform: translateY(-50%);
+  width: 40px;
+  height: 40px;
+}
+
+.vo-lightbox__nav--prev {
+  left: 12px;
+}
+
+.vo-lightbox__nav--next {
+  right: 12px;
+}
+
+.vo-lightbox__close:hover,
+.vo-lightbox__nav:hover {
+  background: rgba(255, 255, 255, 0.22);
+}
+
+.vo-lightbox__nav:active {
+  transform: translateY(-50%) scale(0.94);
+}
+
+.vo-lightbox__close:active {
+  transform: scale(0.94);
+}
+
+.vo-lightbox__caption {
+  position: absolute;
+  left: 50%;
+  bottom: 20px;
+  transform: translateX(-50%);
+  max-width: min(640px, calc(100% - 32px));
+  padding: 8px 14px;
+  border-radius: 12px;
+  background: rgba(0, 0, 0, 0.55);
+  color: #fff;
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  line-height: 1.5;
+  text-align: center;
+  cursor: default;
+  word-break: break-word;
+}
+
+.vo-lightbox__counter {
+  position: absolute;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  color: rgba(255, 255, 255, 0.85);
+  font-family: system-ui, sans-serif;
+  font-size: 13px;
+  font-weight: 500;
+  cursor: default;
+}
+
+@media (max-width: 440px) {
+  .vo-lightbox {
+    padding: 48px 8px 64px;
+  }
+
+  .vo-lightbox__nav {
+    width: 36px;
+    height: 36px;
+  }
+
+  .vo-lightbox__nav--prev {
+    left: 6px;
+  }
+
+  .vo-lightbox__nav--next {
+    right: 6px;
+  }
+}
+
 .vo-msg--system span {
   font-size: 12px;
   color: var(--vo-text-muted);
@@ -518,6 +723,206 @@
 .vo-send:disabled {
   opacity: 0.4;
   cursor: not-allowed;
+}
+
+.vo-icon-btn:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+/* ── Attachment chips above the input ───────────────── */
+.vo-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.vo-attachment {
+  position: relative;
+  width: 56px;
+  height: 56px;
+  border-radius: 10px;
+  background: var(--vo-input-inner-bg);
+  border: 1px solid var(--vo-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  color: var(--vo-text-muted);
+  flex-shrink: 0;
+}
+
+.vo-attachment img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.vo-attachment--uploading {
+  opacity: 0.7;
+}
+
+.vo-attachment--error {
+  border-color: #d4534f;
+  color: #d4534f;
+}
+
+.vo-attachment-ic {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.vo-attachment-spinner {
+  position: absolute;
+  inset: 0;
+  margin: auto;
+  width: 18px;
+  height: 18px;
+  border: 2px solid rgba(255, 255, 255, 0.5);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: vo-spin 0.7s linear infinite;
+}
+
+@keyframes vo-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.vo-attachment-x {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: #1f2024;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.vo-input-inner--recording {
+  border-color: rgba(212, 83, 79, 0.5);
+}
+
+.vo-rec-row {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-height: 36px;
+  padding: 2px 0;
+}
+
+.vo-rec-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.vo-rec-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #d4534f;
+  flex-shrink: 0;
+  animation: vo-pulse 1.2s ease-in-out infinite;
+}
+
+.vo-rec-time {
+  font-size: 13px;
+  color: #d4534f;
+  font-family: system-ui, sans-serif;
+}
+
+.vo-rec-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.vo-rec-cancel {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  font-family: system-ui, sans-serif;
+  color: var(--vo-text-muted);
+  padding: 4px 8px;
+  border-radius: 6px;
+  transition: color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.vo-rec-cancel:hover {
+  color: var(--vo-text);
+  background: var(--vo-surface);
+}
+
+.vo-rec-stop {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: var(--vo-send-bg);
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: #ffffff;
+}
+
+@keyframes vo-pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* ── Attachments rendered inside user bubbles ───────── */
+.vo-user-attachments {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: 4px;
+  max-width: 280px;
+}
+
+.vo-user-attachment--image {
+  display: block;
+  border: none;
+  padding: 0;
+  background: none;
+  cursor: pointer;
+  border-radius: 12px;
+  overflow: hidden;
+  width: 200px;
+  max-width: 100%;
+}
+
+.vo-user-attachment--image img {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.vo-user-attachment--audio,
+.vo-user-attachment--video {
+  width: 240px;
+  max-width: 100%;
+}
+
+.vo-user-attachment--video {
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 /* ── Responsive ────────────────────────────────────── */

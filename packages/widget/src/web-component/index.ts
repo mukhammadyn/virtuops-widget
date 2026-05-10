@@ -4,7 +4,7 @@ import { ChatWidget } from '../components/ChatWidget'
 import widgetCss from '../styles/widget.css?inline'
 
 class VirtuOpsChatElement extends HTMLElement {
-  static observedAttributes = ['token', 'api-url']
+  static observedAttributes = ['token', 'api-url', 'theme']
 
   private root: ReactDOM.Root | null = null
   private shadow: ShadowRoot | null = null
@@ -50,7 +50,19 @@ class VirtuOpsChatElement extends HTMLElement {
   private render() {
     const token = this.getAttribute('token') ?? ''
     const apiUrl = this.getAttribute('api-url') ?? undefined
-    this.root?.render(React.createElement(ChatWidget, { token, apiUrl, shadowRoot: this.shadow }))
+    const themeAttr = this.getAttribute('theme')
+    const theme =
+      themeAttr === 'light' || themeAttr === 'dark' || themeAttr === 'auto'
+        ? themeAttr
+        : undefined
+    this.root?.render(
+      React.createElement(ChatWidget, {
+        token,
+        apiUrl,
+        theme,
+        shadowRoot: this.shadow,
+      }),
+    )
   }
 }
 
