@@ -1,6 +1,6 @@
 {
   "name": "@virtuops/widget",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "description": "Embeddable AI chat widget for VirtuOps. Framework-agnostic web component with branding, real-time operator handoff, and zero runtime dependencies for the host page.",
   "license": "MIT",
   "author": "VirtuOps",
